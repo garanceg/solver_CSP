@@ -130,6 +130,30 @@ main/fast:
 	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/build
 .PHONY : main/fast
 
+constraint.o: constraint.cpp.o
+.PHONY : constraint.o
+
+# target to build an object file
+constraint.cpp.o:
+	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/constraint.cpp.o
+.PHONY : constraint.cpp.o
+
+constraint.i: constraint.cpp.i
+.PHONY : constraint.i
+
+# target to preprocess a source file
+constraint.cpp.i:
+	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/constraint.cpp.i
+.PHONY : constraint.cpp.i
+
+constraint.s: constraint.cpp.s
+.PHONY : constraint.s
+
+# target to generate assembly for a file
+constraint.cpp.s:
+	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/constraint.cpp.s
+.PHONY : constraint.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -154,6 +178,30 @@ main.cpp.s:
 	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+variable.o: variable.cpp.o
+.PHONY : variable.o
+
+# target to build an object file
+variable.cpp.o:
+	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/variable.cpp.o
+.PHONY : variable.cpp.o
+
+variable.i: variable.cpp.i
+.PHONY : variable.i
+
+# target to preprocess a source file
+variable.cpp.i:
+	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/variable.cpp.i
+.PHONY : variable.cpp.i
+
+variable.s: variable.cpp.s
+.PHONY : variable.s
+
+# target to generate assembly for a file
+variable.cpp.s:
+	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/variable.cpp.s
+.PHONY : variable.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -163,9 +211,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... main"
+	@echo "... constraint.o"
+	@echo "... constraint.i"
+	@echo "... constraint.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... variable.o"
+	@echo "... variable.i"
+	@echo "... variable.s"
 .PHONY : help
 
 
