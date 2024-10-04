@@ -1,8 +1,58 @@
-build/
-.vscode/
+# build/
+# .vscode/
 
-*.exe
+# *.exe
+# *.obj 
+# *.pdb
+# *.ilk
+# *.o
+
+# Ignore build directories
+# Ignore build directories and generated files
+/build/
+/[Bb]uild*/
+
+# Ignore CMake generated directories and files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cmake
+*.cbp
+*.workspace
+
+# Ignore files generated in the src directory
+src/CMakeFiles/
+src/*.o
+src/*.o.d
+src/*.o.o.d
+src/*.marks
+
+# Ignore any build artifacts
+*.o
 *.obj
+*.exe
+*.out
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
 *.pdb
 *.ilk
-*.o
+*.manifest
+*.rsp
+
+# Ignore temporary files
+*.log
+*.tmp
+*.swp
+
+# Ignore IDE-specific files
+.vscode/
+.out/
+# Ignore user-specific files
+*.user
+*.DS_Store
+*.VC.db
+*.VC.opendb

@@ -7,4 +7,4 @@ project(solver_ppc)
 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${solver_ppc_SOURCE_DIR})
 
-add_subdirectory(src)
+add_subdirectory(src)   
