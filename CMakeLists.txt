@@ -1,8 +1,10 @@
-cmake_minimum_required(VERSION 3.1)
-project(my_project)
+cmake_minimum_required(VERSION 3.12)
 
-add_executable(my_executable
-    main.cpp
-)
+set(CMAKE_CXX_STANDARD 20)
 
-target_compile_features(my_executable PUBLIC cxx_std_17)
+# Project Name
+project(solver_ppc)
+
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${solver_ppc_SOURCE_DIR})
+
+add_subdirectory(src)
