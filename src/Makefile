@@ -130,6 +130,54 @@ main/fast:
 	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/build
 .PHONY : main/fast
 
+CSP.o: CSP.cpp.o
+.PHONY : CSP.o
+
+# target to build an object file
+CSP.cpp.o:
+	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/CSP.cpp.o
+.PHONY : CSP.cpp.o
+
+CSP.i: CSP.cpp.i
+.PHONY : CSP.i
+
+# target to preprocess a source file
+CSP.cpp.i:
+	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/CSP.cpp.i
+.PHONY : CSP.cpp.i
+
+CSP.s: CSP.cpp.s
+.PHONY : CSP.s
+
+# target to generate assembly for a file
+CSP.cpp.s:
+	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/CSP.cpp.s
+.PHONY : CSP.cpp.s
+
+backtrack.o: backtrack.cpp.o
+.PHONY : backtrack.o
+
+# target to build an object file
+backtrack.cpp.o:
+	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/backtrack.cpp.o
+.PHONY : backtrack.cpp.o
+
+backtrack.i: backtrack.cpp.i
+.PHONY : backtrack.i
+
+# target to preprocess a source file
+backtrack.cpp.i:
+	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/backtrack.cpp.i
+.PHONY : backtrack.cpp.i
+
+backtrack.s: backtrack.cpp.s
+.PHONY : backtrack.s
+
+# target to generate assembly for a file
+backtrack.cpp.s:
+	cd /home/nicolas_corvol/solver_CPP/solver_CSP && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/backtrack.cpp.s
+.PHONY : backtrack.cpp.s
+
 constraint.o: constraint.cpp.o
 .PHONY : constraint.o
 
@@ -211,6 +259,12 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... main"
+	@echo "... CSP.o"
+	@echo "... CSP.i"
+	@echo "... CSP.s"
+	@echo "... backtrack.o"
+	@echo "... backtrack.i"
+	@echo "... backtrack.s"
 	@echo "... constraint.o"
 	@echo "... constraint.i"
 	@echo "... constraint.s"

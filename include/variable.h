@@ -10,7 +10,7 @@ class Variable
 public:
     string name;
     vector<int> domain;
-
+    Variable() : name(""), domain({}) {}
     Variable(string name, vector<int> domain);
 };
 
