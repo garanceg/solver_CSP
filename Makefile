@@ -126,8 +126,128 @@ main: cmake_check_build_system
 
 # fast build rule for target.
 main/fast:
-	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/build
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
 .PHONY : main/fast
+
+src/CSP.o: src/CSP.cpp.o
+.PHONY : src/CSP.o
+
+# target to build an object file
+src/CSP.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/CSP.cpp.o
+.PHONY : src/CSP.cpp.o
+
+src/CSP.i: src/CSP.cpp.i
+.PHONY : src/CSP.i
+
+# target to preprocess a source file
+src/CSP.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/CSP.cpp.i
+.PHONY : src/CSP.cpp.i
+
+src/CSP.s: src/CSP.cpp.s
+.PHONY : src/CSP.s
+
+# target to generate assembly for a file
+src/CSP.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/CSP.cpp.s
+.PHONY : src/CSP.cpp.s
+
+src/backtrack.o: src/backtrack.cpp.o
+.PHONY : src/backtrack.o
+
+# target to build an object file
+src/backtrack.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/backtrack.cpp.o
+.PHONY : src/backtrack.cpp.o
+
+src/backtrack.i: src/backtrack.cpp.i
+.PHONY : src/backtrack.i
+
+# target to preprocess a source file
+src/backtrack.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/backtrack.cpp.i
+.PHONY : src/backtrack.cpp.i
+
+src/backtrack.s: src/backtrack.cpp.s
+.PHONY : src/backtrack.s
+
+# target to generate assembly for a file
+src/backtrack.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/backtrack.cpp.s
+.PHONY : src/backtrack.cpp.s
+
+src/constraint.o: src/constraint.cpp.o
+.PHONY : src/constraint.o
+
+# target to build an object file
+src/constraint.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/constraint.cpp.o
+.PHONY : src/constraint.cpp.o
+
+src/constraint.i: src/constraint.cpp.i
+.PHONY : src/constraint.i
+
+# target to preprocess a source file
+src/constraint.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/constraint.cpp.i
+.PHONY : src/constraint.cpp.i
+
+src/constraint.s: src/constraint.cpp.s
+.PHONY : src/constraint.s
+
+# target to generate assembly for a file
+src/constraint.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/constraint.cpp.s
+.PHONY : src/constraint.cpp.s
+
+src/main.o: src/main.cpp.o
+.PHONY : src/main.o
+
+# target to build an object file
+src/main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/main.cpp.o
+.PHONY : src/main.cpp.o
+
+src/main.i: src/main.cpp.i
+.PHONY : src/main.i
+
+# target to preprocess a source file
+src/main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
+
+src/main.s: src/main.cpp.s
+.PHONY : src/main.s
+
+# target to generate assembly for a file
+src/main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
+
+src/variable.o: src/variable.cpp.o
+.PHONY : src/variable.o
+
+# target to build an object file
+src/variable.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/variable.cpp.o
+.PHONY : src/variable.cpp.o
+
+src/variable.i: src/variable.cpp.i
+.PHONY : src/variable.i
+
+# target to preprocess a source file
+src/variable.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/variable.cpp.i
+.PHONY : src/variable.cpp.i
+
+src/variable.s: src/variable.cpp.s
+.PHONY : src/variable.s
+
+# target to generate assembly for a file
+src/variable.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/variable.cpp.s
+.PHONY : src/variable.cpp.s
 
 # Help Target
 help:
@@ -138,6 +258,21 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... main"
+	@echo "... src/CSP.o"
+	@echo "... src/CSP.i"
+	@echo "... src/CSP.s"
+	@echo "... src/backtrack.o"
+	@echo "... src/backtrack.i"
+	@echo "... src/backtrack.s"
+	@echo "... src/constraint.o"
+	@echo "... src/constraint.i"
+	@echo "... src/constraint.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
+	@echo "... src/variable.o"
+	@echo "... src/variable.i"
+	@echo "... src/variable.s"
 .PHONY : help
 
 

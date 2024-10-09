@@ -1,10 +1,16 @@
 cmake_minimum_required(VERSION 3.12)
 
+# Set C++ standard to 20
 set(CMAKE_CXX_STANDARD 20)
 
-# Project Name
-project(solver_ppc)
+# Find all .cpp files in the project
+file(GLOB solver_ppc
+     "src/*.cpp")  # Assuming your .cpp files are in the 'src' folder
 
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${solver_ppc_SOURCE_DIR})
+# Create the executable
+add_executable(main ${solver_ppc})
 
-add_subdirectory(src)   
+# Include header files from the 'include' directory
+target_include_directories(main
+ PRIVATE
+ ${CMAKE_SOURCE_DIR}/include)

@@ -1,54 +1,33 @@
-# build/
-# .vscode/
+# Prerequisites
+*.d
 
-# *.exe
-# *.obj 
-# *.pdb
-# *.ilk
-# *.o
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
 
-# Ignore build directories
-# Ignore build directories and generated files
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+*CMakeCache.txt
+*Makefile
+*cmake_install.cmake
+
 /build/
 /[Bb]uild*/
 
 # Ignore CMake generated directories and files
 CMakeFiles/
-CMakeCache.txt
-cmake_install.cmake
-Makefile
-*.cmake
-*.cbp
-*.workspace
 
-# Ignore files generated in the src directory
-src/CMakeFiles/
-src/*.o
-src/*.o.d
-src/*.o.o.d
-src/*.marks
-
-# Ignore any build artifacts
-*.o
-*.obj
-*.exe
-*.out
-*.dll
-*.so
-*.dylib
-*.a
-*.lib
-*.pdb
-*.ilk
-*.manifest
-*.rsp
-
-# Ignore temporary files
-*.log
-*.tmp
-*.swp
-
-# Ignore IDE-specific files
 .vscode/
 .out/
 # Ignore user-specific files
