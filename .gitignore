@@ -35,3 +35,6 @@ CMakeFiles/
 *.DS_Store
 *.VC.db
 *.VC.opendb
+analysis.txt
+callgrind.out.13799
+main
