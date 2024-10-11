@@ -1,7 +1,5 @@
 #include <iostream>
 
-#include "variable.h"
-#include "constraint.h"
 #include "CSP.h"
 
 CSP n_reines(int n)
@@ -63,18 +61,17 @@ int main()
 
     CSP csp(constraints = constraints, variables = variables);
 
-    CSP csp_2 = n_reines(5);
+    CSP csp_2 = n_reines(19);
 
-    for (Constraint cons : csp_2.constraints)
-    {
-        cout << cons.var1.name << " " << cons.var2.name << "tuple : ";
-        for (auto &tuple : cons.tuples)
-        {
-            cout << "{" << get<0>(tuple) << " " << get<1>(tuple) << "}" ;
-        }
-    cout << " " << endl;
-    }
-
+    // for (Constraint cons : csp_2.constraints)
+    // {
+    //     cout << cons.var1.name << " " << cons.var2.name << "tuple : ";
+    //     for (auto &tuple : cons.tuples)
+    //     {
+    //         cout << "{" << get<0>(tuple) << " " << get<1>(tuple) << "}";
+    //     }
+    //     cout << " " << endl;
+    // }
 
     map<string, int> solution = csp_2.solve();
     for (const auto &[k, v] : solution)
