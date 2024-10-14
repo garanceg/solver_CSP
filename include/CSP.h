@@ -24,6 +24,7 @@ public:
     vector<Constraint> constraints;
     vector<Variable> variables;
     int number_of_nodes = 0;
+    CSP() : constraints({}), variables({}) {}
     CSP(vector<Constraint> &constraints, vector<Variable> &variables);
     bool is_complete(const map<string, int> &assignment) const
     {
