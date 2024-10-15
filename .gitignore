@@ -19,7 +19,7 @@
 *.app
 
 *CMakeCache.txt
-*Makefile
+Makefile
 *cmake_install.cmake
 
 /build/
