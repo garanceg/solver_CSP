@@ -246,10 +246,114 @@ bool CSP::backtrack_iterative(map<string, int> &assignment)
     return false;
 }
 
-map<string, int> CSP::solve()
+// Fonction pour trouver les contraintes concernées par un couple de variables
+std::vector<Constraint> CSP::find_constraints_for_variables(const std::vector<Constraint> &constraints, const std::string &var1Name, const std::string &var2Name) {
+    std::vector<Constraint> relevant_constraints;
+
+    for (const Constraint &cons : constraints) {
+        if (cons.var1.name == var1Name && cons.var2.name == var2Name) {
+            relevant_constraints.push_back(cons);
+        }
+    }
+
+    return relevant_constraints;
+}
+
+bool CSP::revise(Variable &var1, Variable &var2, map<string, int> &domains_index) {
+    bool revised = false;
+    vector<int> &domain1 = var1.domain;
+    vector<int> &domain2 = var2.domain;
+
+    for (int i = 0; i < domains_index[var1.name]; ++i) {
+        int value1 = domain1[i];
+        std::cout << "value " << value1 << std::endl;
+        bool supported = false;
+
+        // On regarde s'il y a une valeur consistante dans le domaine de var2
+        for (int j = 0; j < domains_index[var2.name]; ++j) {
+            int value2 = domain2[j];
+            if (constraint_satisfied(var1, value1, var2, value2)) {
+                supported = true;
+                break;
+            }
+        }
+
+        // Si aucune valeur dans le domaine de var2 ne supporte value1, on le retire du domaine de var1
+        if (!supported) {
+            domain1[i] = domain1[domains_index[var1.name] - 1];
+            domains_index[var1.name]--;
+            revised = true;
+        }
+    }
+    return revised;
+}
+
+bool CSP::constraint_satisfied(Variable &var1, int value1, Variable &var2, int value2) {
+    for (const Constraint &cons : constraints) {
+        if ((cons.var1.name == var1.name && cons.var2.name == var2.name) ||
+            (cons.var1.name == var2.name && cons.var2.name == var1.name)) {
+            for (const auto &[v1, v2] : cons.tuples) {
+                if ((v1 == value1 && v2 == value2) || (v2 == value1 && v1 == value2)) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void CSP::AC_3(std::vector<Constraint>& constraints, vector<Variable>& variables) {  
+    // stocke la taille du domaine de chaque variable
+    std::map<std::string, int> domains_index;
+
+    for (const Variable& var : variables) {
+        domains_index[var.name] = var.domain.size();
+    } 
+
+    vector<tuple<Variable, Variable>> to_be_tested;
+    for (const Constraint &cons : constraints) {
+        to_be_tested.push_back(std::make_tuple(cons.var1, cons.var2));
+        to_be_tested.push_back(std::make_tuple(cons.var2, cons.var1));
+    }
+
+    while (to_be_tested.size() > 0)
+    {
+        std::cout << "TBT size : " << to_be_tested.size() << std::endl;
+        Variable& var_1 = get<0>(to_be_tested[0]);
+        Variable& var_2 = get<1>(to_be_tested[0]);
+        to_be_tested.pop_back();
+
+        std::vector<Constraint> found_constraints_left = find_constraints_for_variables(constraints, var_1.name, var_2.name);
+        std::vector<Constraint> found_constraints_right = find_constraints_for_variables(constraints, var_2.name, var_1.name);
+
+        if (revise(var_1, var_2, domains_index)) {
+            // Si le domaine de var_1 est réduit à zéro, le problème est inconsistant
+            if (domains_index[var_1.name] == 0) {
+                std::cout << "inconsistent" << std::endl;
+                return; 
+            }
+
+            // On ajoute les contraintes concernées par la modification de var_1
+            for (const Constraint &cons : constraints) {
+                if (cons.var1.name == var_1.name && cons.var2.name != var_2.name) {
+                    to_be_tested.push_back(std::make_tuple(cons.var2, var_1));
+                } else if (cons.var2.name == var_1.name && cons.var1.name != var_2.name) {
+                    to_be_tested.push_back(std::make_tuple(cons.var1, var_1));
+                }
+            }
+        }
+    }
+}
+
+
+map<string, int> CSP::solve(std::vector<Constraint>& constraints, vector<Variable>& variables)
 {
     map<string, int> assignment;
     clock_t start = clock();
+    AC_3(constraints, variables);
+    for (const Variable var : variables) {
+        std::cout << var.domain.size() << std::endl;
+    }
     bool sol_found = backtrack_iterative(assignment);
     clock_t end = clock();
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
