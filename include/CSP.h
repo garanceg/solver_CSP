@@ -36,11 +36,11 @@ public:
     Variable select_min_size_domain_variable(const map<string, int> &assigment);
     bool is_consistent(const map<string, int> &assignment, const Variable &variable, const int &value);
     map<string, int> solve(std::vector<Constraint> &constraints, vector<Variable> &variables);
-    void AC_3(std::vector<Constraint> &constraints, vector<Variable> &variables);
+    bool AC_3(std::vector<Constraint> &constraints, vector<Variable> &variables);
     std::vector<Constraint> find_constraints_for_variables(const std::vector<Constraint> &constraints, const std::string &var1Name, const std::string &var2Name);
-    bool revise(Variable &var1, Variable &var2, map<string, int> &domains_index);
+    bool revise(Variable &var1, Variable &var2);
     bool constraint_satisfied(Variable &var1, int value1, Variable &var2, int value2);
-
+    int get_variable_index_from_name(string name);
 };
 
 #endif
