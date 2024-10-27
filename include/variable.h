@@ -5,8 +5,7 @@
 #include <vector>
 using namespace std;
 
-class Variable
-{
+class Variable {
 public:
     string name;
     vector<int> domain;
