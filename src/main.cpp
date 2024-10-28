@@ -226,8 +226,8 @@ int main() {
     bool activate_FC = true;
 
     tuple<map<string, int>, int, double> solution = csp.solve(csp.constraints, csp.variables, activate_AC1, activate_AC3,
-            activate_FC);
-    
-    for (const auto &[k, v] : std::get<0>(solution))
-        cout << "variable" << k << " : " << v << endl;   
+        activate_FC);
+
+    for (const auto& [k, v] : std::get<0>(solution))
+        cout << "variable" << k << " : " << v << endl;
 }
