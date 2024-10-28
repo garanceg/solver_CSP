@@ -9,9 +9,11 @@
 
 CSP::CSP(vector<Constraint>& constraints, vector<Variable>& variables) : constraints(constraints), variables(variables) {};
 
-int CSP::get_variable_index_from_name(string name) {
+int CSP::get_variable_index_from_name(string name)
+{
     int var_index = 0;
-    for (Variable var : variables) {
+    for (Variable var : variables)
+    {
         if (var.name == name)
             return var_index;
         var_index += 1;
@@ -24,8 +26,10 @@ Variable CSP::select_min_size_domain_variable(const map<string, int>& assigment)
     assert(variables.size() >= assigment.size());
     Variable selected_variable;
     int min_size_domain = numeric_limits<int>::max();
-    for (const Variable var : variables) {
-        if (assigment.count(var.name) == 0 && var.domain.size() < min_size_domain) {
+    for (const Variable var : variables)
+    {
+        if (assigment.count(var.name) == 0 && var.domain.size() < min_size_domain)
+        {
             min_size_domain = var.domain.size();
             selected_variable = var;
         };
@@ -40,11 +44,13 @@ bool CSP::check_assignment_consistency(const std::map<std::string, int>& assignm
         int index_var;
 
         // Determine if the current variable is in the constraint
-        if (cons.var1.name == variable.name) {
+        if (cons.var1.name == variable.name)
+        {
             other_var = cons.var2;
             index_var = 0;
         }
-        else if (cons.var2.name == variable.name) {
+        else if (cons.var2.name == variable.name)
+        {
             other_var = cons.var1;
             index_var = 1;
         }
@@ -57,17 +63,20 @@ bool CSP::check_assignment_consistency(const std::map<std::string, int>& assignm
                 value_in_tuple = true;
                 break;
             }
-            else if (index_var == 1 && (std::get<1>(t) == value)) {
+            else if (index_var == 1 && (std::get<1>(t) == value))
+            {
                 value_in_tuple = true;
                 break;
             }
         }
         // If the value is not valid according to the constraint, return false
-        if (!value_in_tuple) return false;
+        if (!value_in_tuple)
+            return false;
 
         // If the other variable is not yet assigned AND the value is valid
         // The constraint is trivially respected
-        if (assignment.count(other_var.name) == 0) continue;
+        if (assignment.count(other_var.name) == 0)
+            continue;
 
         // Check if the constraint is respected between
         bool constraint_satisfied = false;
@@ -82,7 +91,8 @@ bool CSP::check_assignment_consistency(const std::map<std::string, int>& assignm
             }
 
         }
-        if (!constraint_satisfied) return false;
+        if (!constraint_satisfied)
+            return false;
     }
     return true;
 }
@@ -114,19 +124,24 @@ bool CSP::update_variable_domain(Variable& var1, Variable& var2) {
     // for (int val : var1.domain)
     //     cout << val;
     // cout << " " << endl;
-    for (int val1 : var1.domain) {
+    for (int val1 : var1.domain)
+    {
         // std::cout << "value " << val1 << std::endl;
         bool supported = false;
 
-        for (int val2 : var2.domain) {
-            if (check_constraint_satisfaction(var1, val1, var2, val2)) {
+        for (int val2 : var2.domain)
+        {
+            if (check_constraint_satisfaction(var1, val1, var2, val2))
+            {
                 supported = true;
                 break;
             }
         }
-        if (!supported) to_be_removed.push_back(val1);
+        if (!supported)
+            to_be_removed.push_back(val1);
     }
-    if (to_be_removed.size() == 0) return false;
+    if (to_be_removed.size() == 0)
+        return false;
 
     for (int val : to_be_removed)
         var1.domain.erase(std::remove(var1.domain.begin(), var1.domain.end(), val), var1.domain.end());
@@ -151,23 +166,27 @@ void CSP::forward_checking(Variable& new_assigned_variable, const int& assigned_
 
         for (const Constraint& cons : constraints) {
             // Find the constraint associated with var and new_assigned_var
-            if (cons.var1.name == var.name && cons.var2.name == new_assigned_variable.name) {
+            if (cons.var1.name == var.name && cons.var2.name == new_assigned_variable.name)
+            {
                 cons_index_assigned_var = 1;
                 constraint_tuples = cons.tuples;
                 break;
             }
-            else if (cons.var2.name == var.name && cons.var1.name == new_assigned_variable.name) {
+            else if (cons.var2.name == var.name && cons.var1.name == new_assigned_variable.name)
+            {
                 cons_index_assigned_var = 0;
                 constraint_tuples = cons.tuples;
                 break;
             }
         }
 
-        if (cons_index_assigned_var == -1) continue;
+        if (cons_index_assigned_var == -1)
+            continue;
 
         assert(domains_index[var.name] >= 0);
         // Iterate on all the supported variable
-        for (int i = 0; i < domains_index[var.name]; i++) {
+        for (int i = 0; i < domains_index[var.name]; i++)
+        {
             bool val_supported = false;
             int value = var.domain[i];
             // Check if variable is supported
@@ -176,12 +195,14 @@ void CSP::forward_checking(Variable& new_assigned_variable, const int& assigned_
                     val_supported = true;
                     break;
                 }
-                else if ((cons_index_assigned_var == 1) && (std::get<1>(t) == assigned_value) && (std::get<0>(t) == value)) {
+                else if ((cons_index_assigned_var == 1) && (std::get<1>(t) == assigned_value) && (std::get<0>(t) == value))
+                {
                     val_supported = true;
                     break;
                 }
             }
-            if (not val_supported) {
+            if (not val_supported)
+            {
                 // If the value is not supported we swap it with the value just before the marker
                 std::swap(var.domain[i], var.domain[domains_index[var.name] - 1]);
                 // Reduce the marker
@@ -196,11 +217,14 @@ bool CSP::backtrack(map<string, int>& assignment) {
 
     Variable var = select_min_size_domain_variable(assignment);
 
-    for (int val : var.domain) {
+    for (int val : var.domain)
+    {
         number_of_nodes++;
-        if (check_assignment_consistency(assignment, var, val)) {
+        if (check_assignment_consistency(assignment, var, val))
+        {
             assignment.insert(pair<string, int>(var.name, val));
-            if (backtrack(assignment)) return true;
+            if (backtrack(assignment))
+                return true;
             assignment.erase(var.name);
         }
     }
@@ -225,7 +249,8 @@ bool CSP::backtrack_iterative(map<string, int>& assignment, bool activate_FC) {
         map<string, int> current_domains_index = state.domains_index;
 
         // If not more supported values in the domain, backtrack
-        if (value_index >= current_domains_index[current_variable.name]) {
+        if (value_index >= current_domains_index[current_variable.name])
+        {
             stack.pop();
             continue;
         }
@@ -235,13 +260,15 @@ bool CSP::backtrack_iterative(map<string, int>& assignment, bool activate_FC) {
         int value = current_variable.domain[value_index];
         state.value_index++;
 
-        if (check_assignment_consistency(current_assignment, current_variable, value)) {
+        if (check_assignment_consistency(current_assignment, current_variable, value))
+        {
             current_assignment[current_variable.name] = value;
 
             if (activate_FC)
                 forward_checking(current_variable, value, current_domains_index, current_assignment);
 
-            if (is_complete(current_assignment)) {
+            if (is_complete(current_assignment))
+            {
                 assignment = current_assignment;
                 return true;
             }
@@ -255,9 +282,11 @@ bool CSP::backtrack_iterative(map<string, int>& assignment, bool activate_FC) {
 
 bool CSP::AC_1(std::vector<Constraint>& constraints, vector<Variable>& variables) {
     bool term = false;
-    while (term == false) {
+    while (term == false)
+    {
         term = true;
-        for (const Constraint cons : constraints) {
+        for (const Constraint cons : constraints)
+        {
             int index_var_1 = get_variable_index_from_name(cons.var1.name);
             int index_var_2 = get_variable_index_from_name(cons.var2.name);
             Variable& var_1 = variables[index_var_1];
@@ -275,7 +304,8 @@ bool CSP::AC_1(std::vector<Constraint>& constraints, vector<Variable>& variables
 
 bool CSP::AC_3(std::vector<Constraint>& constraints, vector<Variable>& variables) {
     vector<tuple<int, int>> to_be_tested;
-    for (const Constraint cons : constraints) {
+    for (const Constraint cons : constraints)
+    {
         int idx1 = get_variable_index_from_name(cons.var1.name);
         int idx2 = get_variable_index_from_name(cons.var2.name);
         assert(idx1 != -1);
@@ -284,7 +314,8 @@ bool CSP::AC_3(std::vector<Constraint>& constraints, vector<Variable>& variables
         to_be_tested.push_back(std::make_tuple(idx2, idx1));
     }
 
-    while (to_be_tested.size() > 0) {
+    while (to_be_tested.size() > 0)
+    {
         // std::cout << "TBT size : " << to_be_tested.size() << std::endl;
         int idx1 = get<0>(to_be_tested[0]);
         int idx2 = get<1>(to_be_tested[0]);
@@ -292,9 +323,11 @@ bool CSP::AC_3(std::vector<Constraint>& constraints, vector<Variable>& variables
         Variable& var_2 = variables[idx2];
         to_be_tested.erase(to_be_tested.begin());
 
-        if (update_variable_domain(var_1, var_2)) {
+        if (update_variable_domain(var_1, var_2))
+        {
             // Si le domaine de var_1 est réduit à zéro, le problème est inconsistant
-            if (var_1.domain.size() == 0) {
+            if (var_1.domain.size() == 0)
+            {
                 return false;
             }
 
@@ -305,7 +338,8 @@ bool CSP::AC_3(std::vector<Constraint>& constraints, vector<Variable>& variables
                     assert(index_new_var != -1);
                     to_be_tested.push_back(std::make_tuple(index_new_var, idx1));
                 }
-                else if (cons.var2.name == var_1.name && cons.var1.name != var_2.name) {
+                else if (cons.var2.name == var_1.name && cons.var1.name != var_2.name)
+                {
                     int index_new_var = get_variable_index_from_name(cons.var1.name);
                     assert(index_new_var != -1);
                     to_be_tested.push_back(std::make_tuple(index_new_var, idx1));
@@ -343,7 +377,8 @@ tuple<map<string, int>, int, double> CSP::solve(std::vector<Constraint>& constra
     cout << "]" << endl;
     if (!csp_is_consistent) {
         cout << "CSP is inconsistent because of these variables: ";
-        for (Variable var : variables) {
+        for (Variable var : variables)
+        {
             if (var.domain.size() == 0)
                 cout << var.name;
         }
@@ -355,7 +390,8 @@ tuple<map<string, int>, int, double> CSP::solve(std::vector<Constraint>& constra
     clock_t end = clock();
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << "Visited " << number_of_nodes << " nodes." << endl;
-    if (sol_found) {
+    if (sol_found)
+    {
         cout << "Solution found in " << elapsed << " seconds." << endl;
         return make_tuple(assignment, number_of_nodes, elapsed);
     }

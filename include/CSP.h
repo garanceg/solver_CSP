@@ -10,14 +10,16 @@
 #include <cassert>
 using namespace std;
 
-struct Backward_State {
+struct Backward_State
+{
     map<string, int> assignment;
     Variable variable;
     int value_index;
     map<string, int> domains_index;
 };
 
-class CSP {
+class CSP
+{
 public:
     vector<Constraint> constraints;
     vector<Variable> variables;
