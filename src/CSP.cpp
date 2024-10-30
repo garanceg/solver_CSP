@@ -6,6 +6,10 @@
 #include <stack>
 #include <algorithm>
 #include <limits>
+#include <set>
+#include <random> 
+#include <stdexcept>
+#include <sstream>
 
 CSP::CSP(vector<Constraint>& constraints, vector<Variable>& variables) : constraints(constraints), variables(variables) {};
 
@@ -16,21 +20,80 @@ int CSP::get_variable_index_from_name(string name) {
             return var_index;
         var_index += 1;
     }
-    assert(var_index < variables.size());
+    if (var_index > variables.size()) {
+        std::stringstream ss;
+        ss << "Error trying to get variable " << name << " at index " << var_index << " with " << variables.size() << " variables.";
+        string error_message = ss.str();
+        throw runtime_error(error_message);
+    }
     return -1;
 }
 
-Variable CSP::select_min_size_domain_variable(const map<string, int>& assigment) {
+///////////////////////////
+//  Variable order strat //
+///////////////////////////
+
+void CSP::sort_variables(string variable_order_strategy, vector<Variable>& variables) {
+    if ((variable_order_strategy == "") || (variable_order_strategy == "given_order")) {
+        return;
+    }
+    else if (variable_order_strategy == "min_domain_size") {
+        return min_domain_size_variable_order(variables);
+    }
+    else if (variable_order_strategy == "random") {
+        return random_variable_order(variables);
+    }
+    else if (variable_order_strategy == "most_constrained") {
+        return most_constrained_variable_order(variables);
+    }
+    else {
+        std::stringstream ss;
+        ss << "The variable order startegy " << variable_order_strategy << "is not supported. Supported strategies are [given_order, min_domain_size, random, most_constrained]";
+        string error_message = ss.str();
+        throw runtime_error(error_message);
+    }
+    return;
+}
+
+void CSP::min_domain_size_variable_order(vector<Variable>& variables) {
+    std::stable_sort(variables.begin(), variables.end(), [](const Variable& a, const Variable& b) {
+        return a.domain.size() < b.domain.size();
+        });
+    return;
+}
+
+void CSP::random_variable_order(vector<Variable>& variables) {
+    std::random_device rd;
+    std::default_random_engine rng(rd());
+    std::shuffle(variables.begin(), variables.end(), rng);
+    return;
+}
+
+void CSP::most_constrained_variable_order(vector<Variable>& variables) {
+    // Count constraints per variable
+    map<string, int> number_of_constraint_per_variable;
+    for (const auto& cons : constraints) {
+        number_of_constraint_per_variable[cons.var1.name]++;
+        number_of_constraint_per_variable[cons.var2.name]++;
+    }
+
+    // Sort variables by constraint count in descending order
+    std::stable_sort(variables.begin(), variables.end(), [&](const Variable& a, const Variable& b) {
+        return number_of_constraint_per_variable[a.name] > number_of_constraint_per_variable[b.name];
+        });
+
+    return;
+}
+
+
+Variable CSP::select_next_variable(const map<string, int>& assigment) {
     assert(variables.size() >= assigment.size());
-    Variable selected_variable;
-    int min_size_domain = numeric_limits<int>::max();
     for (const Variable var : variables) {
-        if (assigment.count(var.name) == 0 && var.domain.size() < min_size_domain) {
-            min_size_domain = var.domain.size();
-            selected_variable = var;
-        };
-    };
-    return selected_variable;
+        if (assigment.count(var.name) == 0)
+            return var;
+    }
+    assert(-1 == 0);
+    return Variable();
 };
 
 
@@ -69,7 +132,7 @@ bool CSP::check_assignment_consistency(const std::map<std::string, int>& assignm
         // The constraint is trivially respected
         if (assignment.count(other_var.name) == 0) continue;
 
-        // Check if the constraint is respected between
+        // Check if the constraint can be respected with the value
         bool constraint_satisfied = false;
         for (const tuple<int, int>& t : cons.tuples) {
             if (index_var == 0 && std::get<0>(t) == value && std::get<1>(t) == assignment.at(other_var.name)) {
@@ -107,15 +170,9 @@ bool CSP::check_constraint_satisfaction(Variable& var1, int val1, Variable& var2
     return false;
 }
 
-// Revise the domain of variable 1 according to the values supported by variable 2
 bool CSP::update_variable_domain(Variable& var1, Variable& var2) {
-    // cout << "var to be tested " << var1.name << " " << var2.name << endl;
     vector<int> to_be_removed;
-    // for (int val : var1.domain)
-    //     cout << val;
-    // cout << " " << endl;
     for (int val1 : var1.domain) {
-        // std::cout << "value " << val1 << std::endl;
         bool supported = false;
 
         for (int val2 : var2.domain) {
@@ -130,11 +187,6 @@ bool CSP::update_variable_domain(Variable& var1, Variable& var2) {
 
     for (int val : to_be_removed)
         var1.domain.erase(std::remove(var1.domain.begin(), var1.domain.end(), val), var1.domain.end());
-
-    // for (int val : var1.domain)
-    //     cout
-    //         << val;
-    // cout << " " << endl;
     return true;
 }
 
@@ -191,26 +243,15 @@ void CSP::forward_checking(Variable& new_assigned_variable, const int& assigned_
     }
 }
 
-bool CSP::backtrack(map<string, int>& assignment) {
-    if (is_complete(assignment)) return true;
 
-    Variable var = select_min_size_domain_variable(assignment);
-
-    for (int val : var.domain) {
-        number_of_nodes++;
-        if (check_assignment_consistency(assignment, var, val)) {
-            assignment.insert(pair<string, int>(var.name, val));
-            if (backtrack(assignment)) return true;
-            assignment.erase(var.name);
-        }
+bool CSP::backtrack_iterative(map<string, int>& assignment, bool activate_FC, map<string, vector<int>> sorted_domains) {
+    for (Variable var : variables) {
+        cout << var.name;
     }
-    return false;
-}
-
-bool CSP::backtrack_iterative(map<string, int>& assignment, bool activate_FC) {
+    cout << " " << endl;
     stack<Backward_State> stack;
     // Initialization with smaller domain OR given order
-    Variable first_var = select_min_size_domain_variable(assignment);
+    Variable first_var = select_next_variable(assignment);
     map<string, int> initial_domains_index;
     for (Variable var : variables)
         initial_domains_index[var.name] = var.domain.size();
@@ -225,13 +266,18 @@ bool CSP::backtrack_iterative(map<string, int>& assignment, bool activate_FC) {
         map<string, int> current_domains_index = state.domains_index;
 
         // If not more supported values in the domain, backtrack
+        vector<int> supported_values_to_be_tried;
+        for (int i = value_index; i < current_domains_index[current_variable.name]; i++) {
+            supported_values_to_be_tried.push_back(current_variable.domain[i]);
+        }
         if (value_index >= current_domains_index[current_variable.name]) {
+            assert(supported_values_to_be_tried.size() == 0);
             stack.pop();
             continue;
         }
+
         number_of_nodes++;
 
-        // Branch with next value
         int value = current_variable.domain[value_index];
         state.value_index++;
 
@@ -246,7 +292,7 @@ bool CSP::backtrack_iterative(map<string, int>& assignment, bool activate_FC) {
                 return true;
             }
             // Next branch
-            Variable next_variable = select_min_size_domain_variable(current_assignment);
+            Variable next_variable = select_next_variable(current_assignment);
             stack.push({ current_assignment, next_variable, 0, current_domains_index });
         }
     }
@@ -317,7 +363,7 @@ bool CSP::AC_3(std::vector<Constraint>& constraints, vector<Variable>& variables
 }
 
 tuple<map<string, int>, int, double> CSP::solve(std::vector<Constraint>& constraints, vector<Variable>& variables,
-    bool activate_AC1, bool activate_AC3, bool activate_FC) {
+    bool activate_AC1, bool activate_AC3, bool activate_FC, string value_order_strategy, string variable_order_startegy) {
 
     map<string, int> assignment;
     cout << "Domain sizes before AC_3: [";
@@ -350,8 +396,17 @@ tuple<map<string, int>, int, double> CSP::solve(std::vector<Constraint>& constra
         cout << " " << endl;
         return make_tuple(assignment, 0, 0);
     }
+    for (Variable var : variables) {
+        cout << var.name;
+    }
+    cout << " " << endl;
+    sort_variables(variable_order_startegy, variables);
+    for (Variable var : variables) {
+        cout << var.name;
+    }
+    cout << " " << endl;
 
-    bool sol_found = backtrack_iterative(assignment, activate_FC);
+    bool sol_found = backtrack_iterative(assignment, activate_FC, {});
     clock_t end = clock();
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << "Visited " << number_of_nodes << " nodes." << endl;
