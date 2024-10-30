@@ -6,6 +6,11 @@
 #include <stack>
 #include <algorithm>
 #include <limits>
+#include <chrono>
+
+using namespace std::chrono;
+
+
 
 CSP::CSP(vector<Constraint> &constraints, vector<Variable> &variables) : constraints(constraints), variables(variables) {};
 
@@ -207,7 +212,9 @@ bool CSP::backtrack(map<string, int> &assignment) {
     return false;
 }
 
-bool CSP::backtrack_iterative(map<string, int> &assignment, bool activate_FC) {
+bool CSP::backtrack_iterative(map<string, int> &assignment, bool activate_FC, 
+        std::chrono::high_resolution_clock::time_point start, double max_duration) {
+
     stack<Backward_State> stack;
     // Initialization with smaller domain OR given order
     Variable first_var = select_min_size_domain_variable(assignment);
@@ -218,6 +225,14 @@ bool CSP::backtrack_iterative(map<string, int> &assignment, bool activate_FC) {
     stack.push({assignment, first_var, 0, initial_domains_index});
 
     while (!stack.empty()) {
+        // Verify if max duration is reached
+        auto now = std::chrono::high_resolution_clock::now();
+        double elapsed_time = std::chrono::duration_cast<std::chrono::duration<double>>(now - start).count();
+        if (elapsed_time >= max_duration) {
+            std::cout << "Backtracking interrupted after " << elapsed_time << " seconds." << std::endl;
+            return false;  // Interrupting algorithm if max duration is reached
+        }
+
         Backward_State &state = stack.top();
         map<string, int> current_assignment = state.assignment;
         Variable current_variable = state.variable;
@@ -316,6 +331,7 @@ bool CSP::AC_3(std::vector<Constraint> &constraints, vector<Variable> &variables
     return true;
 }
 
+
 tuple<map<string, int>, int, double> CSP::solve(std::vector<Constraint> &constraints, vector<Variable> &variables,
         bool activate_AC1, bool activate_AC3, bool activate_FC) {
 
@@ -327,14 +343,17 @@ tuple<map<string, int>, int, double> CSP::solve(std::vector<Constraint> &constra
         }
         cout << "]" << endl;
 
-    clock_t start = clock();
+    const double max_duration = 20.0;  // 1 minute
+
+    auto start = high_resolution_clock::now();
     bool csp_is_consistent = true;
 
     if (activate_AC3)
         csp_is_consistent = AC_3(constraints, variables);
+    auto end_consistence = high_resolution_clock::now();
+
+    double time_consistence = duration_cast<duration<double>>(end_consistence - start).count();
     
-    clock_t end_consistence = clock();
-    double time_consistence = double(end_consistence - start) / CLOCKS_PER_SEC;
     cout << "Checked consistence in " << time_consistence << " seconds" << endl;
     cout << "Domain sizes after AC_3: [";
     for (Variable var : variables) {
@@ -348,17 +367,21 @@ tuple<map<string, int>, int, double> CSP::solve(std::vector<Constraint> &constra
                 cout << var.name;
         }
         cout << " " << endl;
-        return make_tuple(assignment, 0, 0);
+        return make_tuple(assignment, -1, -1);
     }
 
-    bool sol_found = backtrack_iterative(assignment, activate_FC);
-    clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    bool sol_found = false;
+    sol_found = backtrack_iterative(assignment, activate_FC, start, max_duration);
+
+
+    auto end = high_resolution_clock::now();
+    double elapsed = duration_cast<duration<double>>(end - start).count();
+    
     cout << "Visited " << number_of_nodes << " nodes." << endl;
     if (sol_found) {
         cout << "Solution found in " << elapsed << " seconds." << endl;
         return make_tuple(assignment, number_of_nodes, elapsed);
     }
     cout << "No solution found in " << elapsed << " seconds." << endl;
-    return make_tuple(assignment, number_of_nodes, elapsed);
+    return make_tuple(assignment, -1, -1);
 }

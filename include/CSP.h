@@ -8,6 +8,7 @@
 #include <tuple>
 #include <map>
 #include <cassert>
+#include <chrono>
 using namespace std;
 
 struct Backward_State {
@@ -37,7 +38,7 @@ public:
 
     void forward_checking(Variable &new_assigned_variable, const int &assigned_value, map<string, int> &domains_index, const map<string, int> &current_assignment);
     bool backtrack(map<string, int> &assigment);
-    bool backtrack_iterative(map<string, int> &assignment, bool activate_FC);
+    bool backtrack_iterative(map<string, int> &assignment, bool activate_FC, std::chrono::high_resolution_clock::time_point start, double max_duration);
     tuple<map<string, int>, int, double> solve(std::vector<Constraint> &constraints, vector<Variable> &variables, 
             bool activate_AC1 = false, bool activate_AC3 = true, bool activate_FC = true);
     bool AC_1(std::vector<Constraint> &constraints, vector<Variable> &variables);
