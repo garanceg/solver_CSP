@@ -7,10 +7,10 @@
 #include <sstream>
 #include <random>
 
-CSP create_n_queens_CSP(int n) {
+CSP create_n_queens_CSP_tuples(int n) {
     vector<int> domain;
     vector<Variable> variables;
-    vector<Mother_Constraint*> constraints;
+    vector<Constraint*> constraints;
 
     for (int i = 1; i < n + 1; i++) {
         domain.push_back(i);
@@ -31,17 +31,17 @@ CSP create_n_queens_CSP(int n) {
                     }
                 }
             }
-            Mother_Constraint* cons = new Constraint(make_pair(i, j), validPairs);
+            Constraint* cons = new Tuple_Constraint(make_pair(i, j), validPairs);
             constraints.push_back(cons);
         }
     }
     return CSP(constraints = constraints, variables = variables);
 }
 
-CSP create_n_queens_CSP_2(int n) {
+CSP create_n_queens_CSP_diff(int n) {
     vector<int> domain;
     vector<Variable> variables;
-    vector<Mother_Constraint*> constraints;
+    vector<Constraint*> constraints;
 
     for (int i = 1; i < n + 1; i++) {
         domain.push_back(i);
@@ -54,9 +54,9 @@ CSP create_n_queens_CSP_2(int n) {
 
     for (int i = 0; i < n; i++) {
         for (int j = i + 1; j < n; j++) {
-            Mother_Constraint* cons_diff = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), 0);
-            Mother_Constraint* cons_diag_1 = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), i - j);
-            Mother_Constraint* cons_diag_2 = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), j - i);
+            Constraint* cons_diff = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), 0);
+            Constraint* cons_diag_1 = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), i - j);
+            Constraint* cons_diag_2 = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), j - i);
             constraints.push_back(cons_diff);
             constraints.push_back(cons_diag_1);
             constraints.push_back(cons_diag_2);
@@ -78,7 +78,7 @@ CSP create_graph_coloring_CSP(const string instance_name, const int number_of_co
     // String variable to store the read data
     string s;
     vector<Variable> variables;
-    vector<Mother_Constraint*> constraints;
+    vector<Constraint*> constraints;
     vector<int> domain;
     vector<tuple<int, int>> tuples;
     for (int i = 0; i < number_of_color; i++) {
@@ -131,7 +131,7 @@ CSP create_graph_coloring_CSP(const string instance_name, const int number_of_co
             assert(stoi(tokens[2]) <= number_of_nodes);
             Variable var_1 = variables[stoi(tokens[1]) - 1];
             Variable var_2 = variables[stoi(tokens[2]) - 1];
-            Mother_Constraint* cons = new Constraint(make_pair(stoi(tokens[1]), stoi(tokens[2])), tuples);
+            Constraint* cons = new Tuple_Constraint(make_pair(stoi(tokens[1])-1, stoi(tokens[2])-1), tuples);
             constraints.push_back(cons);
         }
     }
@@ -140,49 +140,9 @@ CSP create_graph_coloring_CSP(const string instance_name, const int number_of_co
     return CSP(constraints = constraints, variables = variables);
 }
 
-
-CSP generate_random_CSP(int num_variables, int domain_size) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> distrib(0.0, 1.0);
-
+CSP create_sudokus_CSP_tuples(const string instance_name) {
     vector<Variable> variables;
-    vector<Mother_Constraint*> constraints;
-    vector<int> domain;
-
-    for (int i = 0; i < num_variables; i++) {
-        string letter(1, static_cast<char>('A' + i));
-        std::vector<int> domain;
-        for (int j = 0; j < domain_size; j++) {
-            domain.push_back(j);
-        }
-        Variable var(letter, i, domain);
-        variables.push_back(var);
-    }
-
-    for (int i = 0; i < num_variables - 1; i++) {
-        for (int j = i + 1; j < num_variables; j++) {
-            std::vector<std::tuple<int, int>> allowed_pairs;
-            for (int x = 0; x < domain_size; x++) {
-                for (int y = 0; y < domain_size; y++) {
-                    double z = distrib(gen);
-                    if (z < 0.6) {
-                        allowed_pairs.push_back(std::make_tuple(x, y));
-                    }
-                }
-            }
-            Mother_Constraint* cons = new Constraint(make_pair(i, j), allowed_pairs);
-            constraints.push_back(cons);
-        }
-    }
-    CSP csp(constraints = constraints, variables = variables);
-    return csp;
-}
-
-
-CSP create_sudokus_CSP(const string instance_name) {
-    vector<Variable> variables;
-    vector<Mother_Constraint*> constraints;
+    vector<Constraint*> constraints;
     ifstream file(instance_name);
 
     // Check if the file is successfully opened
@@ -252,7 +212,7 @@ CSP create_sudokus_CSP(const string instance_name) {
                 }
 
                 // Create the constraint with the admissible tuples
-                Mother_Constraint* cons = new Constraint(make_pair(i, j), admissible_tuples);
+                Constraint* cons = new Tuple_Constraint(make_pair(i, j), admissible_tuples);
                 constraints.push_back(cons);
             }
         }
@@ -261,9 +221,9 @@ CSP create_sudokus_CSP(const string instance_name) {
 }
 
 
-CSP create_sudokus_CSP_2(const string instance_name) {
+CSP create_sudokus_CSP_diff(const string instance_name) {
     vector<Variable> variables;
-    vector<Mother_Constraint*> constraints;
+    vector<Constraint*> constraints;
     ifstream file(instance_name);
 
     // Check if the file is successfully opened
@@ -319,8 +279,7 @@ CSP create_sudokus_CSP_2(const string instance_name) {
             int block_i = col_i / block_size + (row_i / block_size) * block_size;
             int block_j = col_j / block_size + (row_j / block_size) * block_size;
             if (col_i == col_j || row_i == row_j || block_i == block_j) {
-                // cout << "var_idx" << i << " " << j << endl;
-                Mother_Constraint* cons = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), 0);
+                Constraint* cons = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), 0);
                 constraints.push_back(cons);
             }
         }

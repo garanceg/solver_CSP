@@ -3,13 +3,13 @@
 
 #include <iostream>
 
-Constraint::Constraint(pair<int, int> variable_indexs, vector<tuple<int, int>> tuples) : variable_indexs(variable_indexs), tuples(tuples) {};
+Tuple_Constraint::Tuple_Constraint(pair<int, int> variable_indexs, vector<tuple<int, int>> tuples) : variable_indexs(variable_indexs), tuples(tuples) {};
 
 
-bool Constraint::check_if_constraint_is_satisfied(int var_1_index, int val_1, int var_2_index, int val_2) {
+bool Tuple_Constraint::check_if_constraint_is_satisfied(int var_1_index, int val_1, int var_2_index, int val_2) {
     assert(var_is_in_constraint(var_1_index));
     assert(var_is_in_constraint(var_2_index));
-    int cons_var_index = get_var_index(var_1_index);
+    int cons_var_index = get_var_index_in_constraint(var_1_index);
     if (cons_var_index == 0) {
         for (const tuple<int, int>& t : tuples) {
             if (std::get<0>(t) == val_1 && std::get<1>(t) == val_2) {
@@ -28,7 +28,7 @@ bool Constraint::check_if_constraint_is_satisfied(int var_1_index, int val_1, in
 }
 
 
-bool Constraint::propagate(const int& new_assigned_variable_idx, const int& assigned_value,
+bool Tuple_Constraint::propagate(const int& new_assigned_variable_idx, const int& assigned_value,
     map<int, int>& domains_index, const map<int, int>& current_assignment, vector<Variable>& variables) {
     bool has_propagated = false;
     int other_variable_index = get_other_variable_index_from_variable(new_assigned_variable_idx);
@@ -54,7 +54,7 @@ Diff_Constraint::Diff_Constraint(pair<int, int> variable_indexs, pair<int, int> 
 bool Diff_Constraint::check_if_constraint_is_satisfied(int var_1_index, int val_1, int var_2_index, int val_2) {
     assert(var_is_in_constraint(var_1_index));
     assert(var_is_in_constraint(var_2_index));
-    int cons_var_1_index = get_var_index(var_1_index);
+    int cons_var_1_index = get_var_index_in_constraint(var_1_index);
     if (cons_var_1_index == 0) {
         if (val_1 * coeffs.first + val_2 * coeffs.second != diff_nb)
             return true;
@@ -72,7 +72,7 @@ bool Diff_Constraint::propagate(const int& new_assigned_variable_idx, const int&
     int other_variable_index = get_other_variable_index_from_variable(new_assigned_variable_idx);
     if ((current_assignment.count(other_variable_index) > 0))
         return has_propagated;
-    int cons_var_1_index = get_var_index(new_assigned_variable_idx);
+    int cons_var_1_index = get_var_index_in_constraint(new_assigned_variable_idx);
     int forbidden_value;
     if (cons_var_1_index == 0)
     {
