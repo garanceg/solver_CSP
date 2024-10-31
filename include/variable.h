@@ -11,7 +11,7 @@ public:
     int idx;
     vector<int> domain;
     // Variable() : name(""), idx(0), domain({}) {}
-    Variable(string name, int idx, vector<int>& domain);
+    Variable(string name, int idx, vector<int> domain);
 };
 
 #endif

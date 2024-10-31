@@ -12,5 +12,8 @@ CSP create_graph_coloring_CSP(const string instance_name, const int number_of_co
 
 CSP generate_random_CSP(int num_variables, int domain_size);
 
+CSP create_sudokus_CSP(const string instance_name);
+CSP create_sudokus_CSP_2(const string instance_name);
+
 
 #endif

@@ -2,6 +2,8 @@
 #include <fstream>
 #include <sstream>
 #include <random>
+#include <iomanip>
+#include <cmath>
 
 #include "variable.h"
 #include "constraint.h"
@@ -10,6 +12,36 @@
 
 using namespace std;
 
+
+
+void draw_sudoku(const std::map<int, int>& sudoku_dict, int grid_size) {
+    int block_size = static_cast<int>(std::sqrt(grid_size));
+
+    for (int i = 0; i < grid_size; ++i) {
+        // Print horizontal block separator
+        if (i % block_size == 0 && i != 0) {
+            std::cout << std::string(grid_size * 3 + block_size - 1, '-') << '\n';
+        }
+        
+        for (int j = 0; j < grid_size; ++j) {
+            // Print vertical block separator
+            if (j % block_size == 0 && j != 0) {
+                std::cout << " | ";
+            }
+            
+            // Calculate the key for the current cell, which is i * grid_size + j
+            int key = i * grid_size + j;
+
+            // Check if there's a value in the dictionary; print it or a blank space
+            if (sudoku_dict.find(key) != sudoku_dict.end()) {
+                std::cout << std::setw(2) << sudoku_dict.at(key) << " ";
+            } else {
+                std::cout << " . ";  // Blank cell
+            }
+        }
+        std::cout << '\n';
+    }
+}
 
 int main() {
     // int num_variables = 10;    // Nombre de variables
@@ -74,20 +106,26 @@ int main() {
     // }
     // outputFile.close();
 
-    CSP csp = create_graph_coloring_CSP("color_instances/queen5_5.col", 5);
-    // CSP csp = create_n_queens_CSP_2(20);
+    // CSP csp = create_graph_coloring_CSP("color_instances/queen5_5.col", 5);
+    // CSP csp = create_n_queens_CSP(30);
+    CSP csp = create_sudokus_CSP("sudokus/9-expert1.txt");
 
-    bool activate_AC1 = true;
-    bool activate_AC3 = false;
+    bool activate_AC1 = false;
+    bool activate_AC3 = true;
     bool activate_FC = false;
     bool activate_MAC = true;
 
     string value_order_startegy = "";
     string variable_order_strategy = "min_domain_size";
-
-    tuple<map<int, int>, int, double> solution = csp.solve(csp.constraints, csp.variables, activate_AC1, activate_AC3,
+    map<int, int> assignment;
+    for (Variable var : csp.variables) {
+        if (var.domain.size() == 1)
+            assignment[var.idx] = var.domain[0];
+    }
+    draw_sudoku(assignment, 9);
+    tuple<map<int, int>, int, double> solution = csp.solve(assignment, activate_AC1, activate_AC3,
         activate_FC, activate_MAC, value_order_startegy, variable_order_strategy);
-
-    for (const auto& [k, v] : std::get<0>(solution))
-        cout << "variable" << k << " : " << v << endl;
+    draw_sudoku(std::get<0>(solution), 9);
+    // for (const auto& [k, v] : std::get<0>(solution))
+    //     cout << "variable" << k << " : " << v << endl;
 }
