@@ -178,3 +178,152 @@ CSP generate_random_CSP(int num_variables, int domain_size) {
     CSP csp(constraints = constraints, variables = variables);
     return csp;
 }
+
+
+CSP create_sudokus_CSP(const string instance_name) {
+    vector<Variable> variables;
+    vector<Mother_Constraint*> constraints;
+    ifstream file(instance_name);
+
+    // Check if the file is successfully opened
+    if (!file.is_open()) {
+        cerr << "Error opening the file!";
+        return CSP();
+    }
+    string line;
+    vector<string> line_splitted;
+
+    getline(file, line);
+    stringstream ss(line);
+    string token;
+    char delimiter = ' ';
+
+    while (getline(ss, token, delimiter)) {
+        line_splitted.push_back(token);
+    }
+    int grid_size = stoi(line_splitted[0]);
+    int block_size = std::round(std::sqrt(grid_size));
+    vector<int> domain;
+    for (int i = 1; i < grid_size + 1; i++) {
+        domain.push_back(i);
+    }
+
+    for (int i = 0; i < grid_size; i++) {
+        getline(file, line);
+        stringstream ss(line);
+        string token;
+        vector<string> line_splitted;
+        char delimiter = ',';
+        while (getline(ss, token, delimiter)) {
+            line_splitted.push_back(token);
+        }
+        for (int j = 0; j < grid_size; j++) {
+            string name_var = "X_" + std::to_string(i) + "_" + std::to_string(j);
+            int var_idx = i * grid_size + j;
+            int given_nb = stoi(line_splitted[j]);
+            if (given_nb != 0) {
+                variables.push_back(Variable(name_var, var_idx, { given_nb }));
+
+            }
+            else
+                variables.push_back(Variable(name_var, var_idx, domain));
+        }
+    }
+    for (int i = 0; i < grid_size * grid_size; i++) {
+        for (int j = i + 1; j < grid_size * grid_size; j++) {
+            int col_i = i % grid_size;
+            int row_i = i / grid_size;
+            int col_j = j % grid_size;
+            int row_j = j / grid_size;
+            int block_i = col_i / block_size + (row_i / block_size) * block_size;
+            int block_j = col_j / block_size + (row_j / block_size) * block_size;
+
+            // Only add constraints for variables in the same row, column, or block
+            if (col_i == col_j || row_i == row_j || block_i == block_j) {
+                vector<tuple<int, int>> admissible_tuples;
+
+                // Populate admissible tuples where values differ
+                for (int vi : domain) {
+                    for (int vj : domain) {
+                        if (vi != vj) {  // Values must be different
+                            admissible_tuples.push_back(make_tuple(vi, vj));
+                        }
+                    }
+                }
+
+                // Create the constraint with the admissible tuples
+                Mother_Constraint* cons = new Constraint(make_pair(i, j), admissible_tuples);
+                constraints.push_back(cons);
+            }
+        }
+    }
+    return CSP(constraints = constraints, variables = variables);
+}
+
+
+CSP create_sudokus_CSP_2(const string instance_name) {
+    vector<Variable> variables;
+    vector<Mother_Constraint*> constraints;
+    ifstream file(instance_name);
+
+    // Check if the file is successfully opened
+    if (!file.is_open()) {
+        cerr << "Error opening the file!";
+        return CSP();
+    }
+    string line;
+    vector<string> line_splitted;
+
+    getline(file, line);
+    stringstream ss(line);
+    string token;
+    char delimiter = ' ';
+
+    while (getline(ss, token, delimiter)) {
+        line_splitted.push_back(token);
+    }
+    int grid_size = stoi(line_splitted[0]);
+    int block_size = std::round(std::sqrt(grid_size));
+    vector<int> domain;
+    for (int i = 1; i < grid_size + 1; i++) {
+        domain.push_back(i);
+    }
+
+    for (int i = 0; i < grid_size; i++) {
+        getline(file, line);
+        stringstream ss(line);
+        string token;
+        vector<string> line_splitted;
+        char delimiter = ',';
+        while (getline(ss, token, delimiter)) {
+            line_splitted.push_back(token);
+        }
+        for (int j = 0; j < grid_size; j++) {
+            string name_var = "X_" + std::to_string(i) + "_" + std::to_string(j);
+            int var_idx = i * grid_size + j;
+            int given_nb = stoi(line_splitted[j]);
+            if (given_nb != 0) {
+                variables.push_back(Variable(name_var, var_idx, { given_nb }));
+
+            }
+            else
+                variables.push_back(Variable(name_var, var_idx, domain));
+        }
+    }
+    for (int i = 0; i < grid_size * grid_size; i++) {
+        for (int j = i + 1; j < grid_size * grid_size; j++) {
+            int col_i = i % grid_size;
+            int row_i = i / grid_size;
+            int col_j = j % grid_size;
+            int row_j = j / grid_size;
+            int block_i = col_i / block_size + (row_i / block_size) * block_size;
+            int block_j = col_j / block_size + (row_j / block_size) * block_size;
+            if (col_i == col_j || row_i == row_j || block_i == block_j) {
+                // cout << "var_idx" << i << " " << j << endl;
+                Mother_Constraint* cons = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), 0);
+                constraints.push_back(cons);
+            }
+        }
+    }
+    return CSP(constraints = constraints, variables = variables);
+}

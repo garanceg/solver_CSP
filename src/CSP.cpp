@@ -276,9 +276,9 @@ bool CSP::backtrack_iterative(map<int, int>& assignment, bool activate_FC, bool 
         if (check_assignment_consistency(current_assignment, current_variable_idx, value)) {
             current_assignment[current_variable_idx] = value;
 
-            if (activate_FC)
+            if (activate_FC) {
                 forward_checking(current_variable_idx, value, current_domains_index, current_assignment);
-
+            }
             if (activate_MAC)
                 leaf_AC_3(current_variable_idx, value, current_domains_index, current_assignment);
 
@@ -288,7 +288,6 @@ bool CSP::backtrack_iterative(map<int, int>& assignment, bool activate_FC, bool 
             }
             // Next branch
             int next_variable_index = select_next_variable_index(variable_order_strategy, current_assignment, current_domains_index);
-
             stack.push({ current_assignment, next_variable_index, 0, current_domains_index });
         }
     }
@@ -301,20 +300,22 @@ bool CSP::backtrack_iterative(map<int, int>& assignment, bool activate_FC, bool 
 
 bool CSP::update_variable_domain(const int& var_1_index, const int& var_2_index, vector<Variable>& variables) {
     vector<int> to_be_removed;
+    vector<Mother_Constraint*> linked_cons = get_constraints_linked_to(var_1_index);
     for (int val1 : variables[var_1_index].domain) {
         bool supported = false;
-
-        for (int val2 : variables[var_2_index].domain) {
-            for (auto& cons : constraints) {
-                if (!(cons->var_is_in_constraint(var_1_index)) || !(cons->var_is_in_constraint(var_2_index)))
-                    continue;
-                if (cons->check_if_constraint_is_satisfied(var_1_index, val1, var_2_index, val2)) {
-                    supported = true;
-                    break;
+        for (auto& cons : linked_cons) {
+            if (cons->var_is_in_constraint(var_2_index)) {
+                for (int val2 : variables[var_2_index].domain) {
+                    if (cons->check_if_constraint_is_satisfied(var_1_index, val1, var_2_index, val2)) {
+                        supported = true;
+                        break;
+                    }
                 }
             }
         }
-        if (!supported) to_be_removed.push_back(val1);
+        if (!supported) {
+            to_be_removed.push_back(val1);
+        }
     }
     if (to_be_removed.size() == 0) return false;
 
@@ -340,12 +341,18 @@ bool CSP::AC_1() {
     return true;
 }
 
-bool CSP::root_AC_3() {
+bool CSP::root_AC_3(map<int, int>& assigment) {
     vector<pair<int, int>> to_be_tested;
     for (auto& cons : constraints) {
         pair<int, int> cons_variables = cons->get_variable_indexs();
-        to_be_tested.push_back(cons_variables);
-        to_be_tested.push_back(make_pair(cons_variables.second, cons_variables.second));
+        if (variables[cons_variables.first].domain.size() != 1) {
+            assert(assigment.count(cons_variables.first) == 0);
+            to_be_tested.push_back(cons_variables);
+        }
+        if (variables[cons_variables.second].domain.size() != 1) {
+            assert(assigment.count(cons_variables.second) == 0);
+            to_be_tested.push_back(make_pair(cons_variables.second, cons_variables.second));
+        }
     }
 
     while (to_be_tested.size() > 0) {
@@ -360,15 +367,17 @@ bool CSP::root_AC_3() {
                 return false;
             }
 
+            else if (variables[var_1_index].domain.size() == 1)
+                assigment[var_1_index] = variables[var_1_index].domain[0];
             // On ajoute les contraintes concernées par la modification de var_1
             for (auto& cons : constraints) {
                 if (not cons->var_is_in_constraint(var_1_index))
                     continue;
                 pair<int, int> cons_var_idx = cons->get_variable_indexs();
-                if ((var_1_index == cons_var_idx.first) && (var_2_index != cons_var_idx.second)) {
+                if ((var_1_index == cons_var_idx.first) && (var_2_index != cons_var_idx.second) && (variables[cons_var_idx.second].domain.size() != 1)) {
                     to_be_tested.push_back(make_pair(cons_var_idx.second, var_1_index));
                 }
-                else if ((var_1_index == cons_var_idx.second) && (var_2_index != cons_var_idx.first)) {
+                else if ((var_1_index == cons_var_idx.second) && (var_2_index != cons_var_idx.first) && (variables[cons_var_idx.first].domain.size() != 1)) {
                     to_be_tested.push_back(make_pair(cons_var_idx.first, var_1_index));
                 }
             }
@@ -381,26 +390,24 @@ bool CSP::root_AC_3() {
 //         SOLVE         //
 ///////////////////////////
 
-tuple<map<int, int>, int, double> CSP::solve(std::vector<Mother_Constraint*>& constraints, vector<Variable>& variables,
-    bool activate_AC1, bool activate_AC3, bool activate_FC, bool activate_MAC, string value_order_strategy, string variable_order_startegy, 
-    double max_duration) {
+tuple<map<int, int>, int, double> CSP::solve(map<int, int>& assignment,
+    bool activate_AC1, bool activate_AC3, bool activate_FC, bool activate_MAC, string value_order_strategy, string variable_order_startegy) {
 
     if (activate_FC && activate_MAC) {
         throw runtime_error("Impossible to use FC and MAC at the same time.");
     }
-    map<int, int> assignment;
     // cout << "Domain sizes before AC_3: [";
-
     // for (Variable var : variables) {
     //     cout << var.domain.size() << ", ";
     // }
     // cout << "]" << endl;
 
+
     auto start = std::chrono::high_resolution_clock::now();
     bool csp_is_consistent = true;
 
     if (activate_AC3)
-        csp_is_consistent = root_AC_3();
+        csp_is_consistent = root_AC_3(assignment);
 
     auto end_consistence = std::chrono::high_resolution_clock::now();
     double time_consistence = std::chrono::duration_cast<std::chrono::duration<double>>(end_consistence - start).count();

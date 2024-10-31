@@ -8,6 +8,7 @@
 #include <tuple>
 #include <map>
 #include <cassert>
+
 #include <chrono>
 
 using namespace std;
@@ -24,6 +25,7 @@ public:
     vector<Mother_Constraint*> constraints;
     vector<Variable> variables;
     int number_of_nodes = 0;
+
 
     CSP() : constraints({}), variables({}) {}
     CSP(vector<Mother_Constraint*>& constraints, vector<Variable>& variables);
@@ -60,13 +62,12 @@ public:
     void forward_checking(const int& new_assigned_variable_idx, const int& assigned_value, map<int, int>& domains_index, const map<int, int>& current_assignment);
 
     bool AC_1();
-    bool root_AC_3();
+    bool root_AC_3(map<int, int>& assigment);
     void leaf_AC_3(const int& new_assigned_variable_idx, const int& assigned_value,
         map<int, int>& domains_index, const map<int, int>& current_assignment);
 
-    tuple<map<int, int>, int, double> solve(std::vector<Mother_Constraint*>& constraints, vector<Variable>& variables,
-        bool activate_AC1 = false, bool activate_AC3 = true, bool activate_FC = true, bool activate_MAC = false, 
-        string value_order_strategy = "", string variable_order_startegy = "", double max_duration = 60.0);
+    tuple<map<int, int>, int, double> solve(map<int, int>& assignment, bool activate_AC1 = false,
+        bool activate_AC3 = true, bool activate_FC = true, bool activate_MAC = false, string value_order_strategy = "", string variable_order_startegy = "");
 };
 
 #endif
