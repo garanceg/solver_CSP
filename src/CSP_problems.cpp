@@ -54,16 +54,12 @@ CSP create_n_queens_CSP_2(int n) {
 
     for (int i = 0; i < n; i++) {
         for (int j = i + 1; j < n; j++) {
-            for (int vi : domain) {
-                for (int vj : domain) {
-                    Mother_Constraint* cons_diff = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), 0);
-                    Mother_Constraint* cons_diag_1 = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), i - j);
-                    Mother_Constraint* cons_diag_2 = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), j - i);
-                    constraints.push_back(cons_diff);
-                    constraints.push_back(cons_diag_1);
-                    constraints.push_back(cons_diag_2);
-                }
-            }
+            Mother_Constraint* cons_diff = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), 0);
+            Mother_Constraint* cons_diag_1 = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), i - j);
+            Mother_Constraint* cons_diag_2 = new Diff_Constraint(make_pair(i, j), make_pair(1, -1), j - i);
+            constraints.push_back(cons_diff);
+            constraints.push_back(cons_diag_1);
+            constraints.push_back(cons_diag_2);
         }
     }
     return CSP(constraints = constraints, variables = variables);

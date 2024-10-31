@@ -8,6 +8,8 @@
 #include <tuple>
 #include <map>
 #include <cassert>
+#include <chrono>
+
 using namespace std;
 
 struct Backward_State {
@@ -39,13 +41,21 @@ public:
     int random_variable_order(vector<int>& variable_order);
     int select_next_variable_index(string variable_ordre_strategy, const map<int, int>& assigment, const map<int, int>& domains_index);
 
+    // Value order
+    void sort_values(string value_order_strategy, Variable& variable, int k);
+    void min_value_order(Variable &current_variable, int k);
+    void random_value_order(Variable &current_variable, int k);
+    void most_supported_value_order(Variable &current_variable, int k);
+
+
     // constraints
     vector<Mother_Constraint*> get_constraints_linked_to(const int& variable_index);
 
     bool check_assignment_consistency(const map<int, int>& assignment, const int& variable_index, const int& value);
     bool update_variable_domain(const int& var_1_index, const int& var_2_index, vector<Variable>& variables);
 
-    bool backtrack_iterative(map<int, int>& assignment, bool activate_FC, bool activate_MAC, string variable_order_strategy);
+    bool backtrack_iterative(map<int, int>& assignment, bool activate_FC, bool activate_MAC, string value_order_strategy,
+            string variable_order_strategy, std::chrono::high_resolution_clock::time_point start, double max_duration);
 
     void forward_checking(const int& new_assigned_variable_idx, const int& assigned_value, map<int, int>& domains_index, const map<int, int>& current_assignment);
 
@@ -55,7 +65,8 @@ public:
         map<int, int>& domains_index, const map<int, int>& current_assignment);
 
     tuple<map<int, int>, int, double> solve(std::vector<Mother_Constraint*>& constraints, vector<Variable>& variables,
-        bool activate_AC1 = false, bool activate_AC3 = true, bool activate_FC = true, bool activate_MAC = false, string value_order_strategy = "", string variable_order_startegy = "");
+        bool activate_AC1 = false, bool activate_AC3 = true, bool activate_FC = true, bool activate_MAC = false, 
+        string value_order_strategy = "", string variable_order_startegy = "", double max_duration = 60.0);
 };
 
 #endif

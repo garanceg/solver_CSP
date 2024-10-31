@@ -18,6 +18,10 @@ public:
     virtual bool check_if_constraint_is_satisfied(int var_1_index, int val_1, int var_2_index, int val_2) = 0;
     virtual bool propagate(const int& new_assigned_variable_idx, const int& assigned_value,
         map<int, int>& domains_index, const map<int, int>& current_assignment, vector<Variable>& variables) = 0;
+
+    virtual vector<tuple<int, int>> get_cons_tuples() {
+        return {};
+    }
 };
 
 class Constraint :public Mother_Constraint {
@@ -52,6 +56,11 @@ public:
         else
             return variable_indexs.first;
     }
+
+    vector<tuple<int, int>> get_cons_tuples() {
+        return tuples;
+    }
+
     bool check_if_constraint_is_satisfied(int var_1_index, int val_1, int var_2_index, int val_2);
 
     bool propagate(const int& new_assigned_variable_idx, const int& assigned_value, map<int, int>& domains_index,
@@ -92,6 +101,7 @@ public:
         else
             return variable_indexs.first;
     }
+
     bool check_if_constraint_is_satisfied(int var_1_index, int val_1, int var_2_index, int val_2);
 
     bool propagate(const int& new_assigned_variable_idx, const int& assigned_value, map<int, int>& domains_index,

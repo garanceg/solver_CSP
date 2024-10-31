@@ -42,6 +42,7 @@ bool Constraint::propagate(const int& new_assigned_variable_idx, const int& assi
             std::swap(variables[other_variable_index].domain[i], variables[other_variable_index].domain[domains_index[other_variable_index] - 1]);
             // Reduce the marker
             domains_index[other_variable_index] -= 1;
+            i--;
         }
     }
     return has_propagated;
@@ -87,6 +88,7 @@ bool Diff_Constraint::propagate(const int& new_assigned_variable_idx, const int&
             std::swap(variables[other_variable_index].domain[i], variables[other_variable_index].domain[domains_index[other_variable_index] - 1]);
             // Reduce the marker
             domains_index[other_variable_index] -= 1;
+            i--;
         }
     }
     return has_propagated;

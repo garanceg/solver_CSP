@@ -10,6 +10,8 @@
 #include <random> 
 #include <stdexcept>
 #include <sstream>
+#include <unordered_map>
+
 
 CSP::CSP(vector<Mother_Constraint*>& constraints, vector<Variable>& variables) : constraints(constraints), variables(variables) {};
 
@@ -90,6 +92,89 @@ int CSP::most_constrained_variable_order(vector<int>& variable_order) {
 }
 
 ///////////////////////////
+//  Value order strat //
+///////////////////////////
+
+void CSP::sort_values(string value_order_strategy, Variable& variable, int k) {
+    if ((value_order_strategy == "") || (value_order_strategy == "given_order")) {
+        return ;
+    }
+    else if (value_order_strategy == "min_value") {
+        return min_value_order(variable, k);
+    }
+    else if (value_order_strategy == "random_value") {
+        return random_value_order(variable, k);
+    }
+    else if (value_order_strategy == "most_supported_value") {
+        return most_supported_value_order(variable, k);
+    }
+    else {
+        std::stringstream ss;
+        ss << "The value order startegy " << value_order_strategy << "is not supported. Supported strategies are [given_order, min_value, random_value, most_supported_value]";
+        string error_message = ss.str();
+        throw runtime_error(error_message);
+    }
+};
+
+
+void CSP::min_value_order(Variable &current_variable, int k) {
+    std::vector<int> first_elements(current_variable.domain.begin(), current_variable.domain.begin() + k);
+    std::sort(first_elements.begin(), first_elements.end());
+    std::copy(first_elements.begin(), first_elements.end(), current_variable.domain.begin());
+}
+
+
+void CSP::random_value_order(Variable &current_variable, int k) {
+    std::random_device rd;
+    std::default_random_engine rng(rd());
+    std::vector<int> first_elements(current_variable.domain.begin(), current_variable.domain.begin() + k);
+    std::shuffle(first_elements.begin(), first_elements.end(), rng);
+    std::copy(first_elements.begin(), first_elements.end(), current_variable.domain.begin());
+}
+
+
+void CSP::most_supported_value_order(Variable &current_variable, int k) {
+    std::unordered_map<int, int> support_count;
+
+    for (const auto& cons : constraints) {
+        if (cons->var_is_in_constraint(current_variable.idx)) {
+            int var_idx = cons->get_var_index(current_variable.idx);
+            if (var_idx == 0) {            
+                for (const auto& t : cons->get_cons_tuples()) {
+                    int value = std::get<0>(t);
+                    support_count[value]++;
+                }
+            }
+            else if (var_idx == 1) {            
+                for (const auto& t : cons->get_cons_tuples()) {
+                    int value = std::get<1>(t);
+                    support_count[value]++;
+                }
+            }
+        }
+    }
+
+    std::vector<int> first_elements(current_variable.domain.begin(), current_variable.domain.begin() + k);
+
+    std::vector<std::pair<int, int>> value_support_pairs;
+    for (int value : first_elements) {
+        value_support_pairs.emplace_back(value, support_count[value]);
+    }
+
+    std::sort(value_support_pairs.begin(), value_support_pairs.end(),
+            [](const std::pair<int, int> &a, const std::pair<int, int> &b) {
+                return a.second > b.second;
+            });
+    
+    first_elements.clear();
+    for (const auto& pair : value_support_pairs) {
+        first_elements.push_back(pair.first);
+    }
+    std::copy(first_elements.begin(), first_elements.end(), current_variable.domain.begin());
+}
+
+
+///////////////////////////
 //      FC AND MAC       //
 ///////////////////////////
 
@@ -145,7 +230,9 @@ bool CSP::check_assignment_consistency(const map<int, int>& assignment, const in
     return true;
 }
 
-bool CSP::backtrack_iterative(map<int, int>& assignment, bool activate_FC, bool activate_MAC, string variable_order_strategy) {
+bool CSP::backtrack_iterative(map<int, int>& assignment, bool activate_FC, bool activate_MAC, string value_order_strategy, 
+        string variable_order_strategy, std::chrono::high_resolution_clock::time_point start, double max_duration) {
+
     stack<Backward_State> stack;
     // Initialization with smaller domain OR given order
 
@@ -156,6 +243,13 @@ bool CSP::backtrack_iterative(map<int, int>& assignment, bool activate_FC, bool 
     stack.push({ assignment, first_var_index, 0, initial_domains_index });
 
     while (!stack.empty()) {
+        auto now = std::chrono::high_resolution_clock::now();
+        double elapsed_time = std::chrono::duration_cast<std::chrono::duration<double>>(now - start).count();
+        if (elapsed_time >= max_duration) {
+            std::cout << "Backtracking interrupted after " << elapsed_time << " seconds." << std::endl;
+            return false;
+        }
+
         Backward_State& state = stack.top();
         map<int, int> current_assignment = state.assignment;
         int current_variable_idx = state.variable_index;
@@ -173,6 +267,8 @@ bool CSP::backtrack_iterative(map<int, int>& assignment, bool activate_FC, bool 
         }
 
         number_of_nodes++;
+
+        sort_values(value_order_strategy, variables[current_variable_idx], current_domains_index[current_variable_idx]);
 
         int value = variables[current_variable_idx].domain[value_index];
         state.value_index++;
@@ -286,33 +382,34 @@ bool CSP::root_AC_3() {
 ///////////////////////////
 
 tuple<map<int, int>, int, double> CSP::solve(std::vector<Mother_Constraint*>& constraints, vector<Variable>& variables,
-    bool activate_AC1, bool activate_AC3, bool activate_FC, bool activate_MAC, string value_order_strategy, string variable_order_startegy) {
+    bool activate_AC1, bool activate_AC3, bool activate_FC, bool activate_MAC, string value_order_strategy, string variable_order_startegy, 
+    double max_duration) {
 
     if (activate_FC && activate_MAC) {
         throw runtime_error("Impossible to use FC and MAC at the same time.");
     }
     map<int, int> assignment;
-    cout << "Domain sizes before AC_3: [";
+    // cout << "Domain sizes before AC_3: [";
 
-    for (Variable var : variables) {
-        cout << var.domain.size() << ", ";
-    }
-    cout << "]" << endl;
+    // for (Variable var : variables) {
+    //     cout << var.domain.size() << ", ";
+    // }
+    // cout << "]" << endl;
 
-    clock_t start = clock();
+    auto start = std::chrono::high_resolution_clock::now();
     bool csp_is_consistent = true;
 
     if (activate_AC3)
         csp_is_consistent = root_AC_3();
 
-    clock_t end_consistence = clock();
-    double time_consistence = double(end_consistence - start) / CLOCKS_PER_SEC;
-    cout << "Checked consistence in " << time_consistence << " seconds" << endl;
-    cout << "Domain sizes after AC_3: [";
-    for (Variable var : variables) {
-        cout << var.domain.size() << ", ";
-    }
-    cout << "]" << endl;
+    auto end_consistence = std::chrono::high_resolution_clock::now();
+    double time_consistence = std::chrono::duration_cast<std::chrono::duration<double>>(end_consistence - start).count();
+    // cout << "Checked consistence in " << time_consistence << " seconds" << endl;
+    // cout << "Domain sizes after AC_3: [";
+    // for (Variable var : variables) {
+    //     cout << var.domain.size() << ", ";
+    // }
+    // cout << "]" << endl;
     if (!csp_is_consistent) {
         cout << "CSP is inconsistent because of these variables: ";
         for (Variable var : variables) {
@@ -323,14 +420,15 @@ tuple<map<int, int>, int, double> CSP::solve(std::vector<Mother_Constraint*>& co
         return make_tuple(assignment, 0, 0);
     }
 
-    bool sol_found = backtrack_iterative(assignment, activate_FC, activate_MAC, variable_order_startegy);
-    clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    bool sol_found = backtrack_iterative(assignment, activate_FC, activate_MAC, value_order_strategy, variable_order_startegy, start, max_duration);
+    auto end = std::chrono::high_resolution_clock::now();
+    double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
+
     cout << "Visited " << number_of_nodes << " nodes." << endl;
     if (sol_found) {
         cout << "Solution found in " << elapsed << " seconds." << endl;
         return make_tuple(assignment, number_of_nodes, elapsed);
     }
     cout << "No solution found in " << elapsed << " seconds." << endl;
-    return make_tuple(assignment, number_of_nodes, elapsed);
+    return make_tuple(assignment, number_of_nodes, -1);
 }
