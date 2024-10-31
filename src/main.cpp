@@ -75,18 +75,18 @@ int main() {
     // outputFile.close();
 
     // CSP csp = create_graph_coloring_CSP("color_instances/queen5_5.col", 5);
-    CSP csp = create_n_queens_CSP(25);  
+    CSP csp = create_n_queens_CSP_2(20);
 
-
-    bool activate_AC1 = false;
+    bool activate_AC1 = true;
     bool activate_AC3 = false;
-    bool activate_FC = true;
-    
-    string value_order_startegy = "";
-    string variable_order_strategy = "";
+    bool activate_FC = false;
+    bool activate_MAC = true;
 
-    tuple<map<string, int>, int, double> solution = csp.solve(csp.constraints, csp.variables, activate_AC1, activate_AC3,
-        activate_FC, value_order_startegy, variable_order_strategy);
+    string value_order_startegy = "";
+    string variable_order_strategy = "min_domain_size";
+
+    tuple<map<int, int>, int, double> solution = csp.solve(csp.constraints, csp.variables, activate_AC1, activate_AC3,
+        activate_FC, activate_MAC, value_order_startegy, variable_order_strategy);
 
     for (const auto& [k, v] : std::get<0>(solution))
         cout << "variable" << k << " : " << v << endl;

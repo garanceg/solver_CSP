@@ -11,46 +11,51 @@
 using namespace std;
 
 struct Backward_State {
-    map<string, int> assignment;
-    Variable variable;
+    map<int, int> assignment;
+    int variable_index;
     int value_index;
-    map<string, int> domains_index;
+    map<int, int> domains_index;
 };
 
 class CSP {
 public:
-    vector<Constraint> constraints;
+    vector<Mother_Constraint*> constraints;
     vector<Variable> variables;
     int number_of_nodes = 0;
 
     CSP() : constraints({}), variables({}) {}
-    CSP(vector<Constraint>& constraints, vector<Variable>& variables);
-    bool is_complete(const map<string, int>& assignment) const {
+    CSP(vector<Mother_Constraint*>& constraints, vector<Variable>& variables);
+    bool is_complete(const map<int, int>& assignment) const {
         return (assignment.size() == variables.size());
     }
-
-    int get_variable_index_from_name(string name);
+    ~CSP() {
+        for (Mother_Constraint* cons : constraints)
+            delete cons;
+    }
 
     // Variable order
-    void sort_variables(string variable_order_strategy, vector<Variable>& variables);
-    void min_domain_size_variable_order(vector<Variable>& variables);
-    void most_constrained_variable_order(vector<Variable>& variables);
-    void random_variable_order(vector<Variable>& variables);
-    Variable select_next_variable(const map<string, int>& assigment);
+    int min_domain_size_variable_order(vector<int>& variable_order, map<int, int> domains_index);
+    int most_constrained_variable_order(vector<int>& variable_order);
+    int random_variable_order(vector<int>& variable_order);
+    int select_next_variable_index(string variable_ordre_strategy, const map<int, int>& assigment, const map<int, int>& domains_index);
 
-    bool check_constraint_satisfaction(Variable& var1, int value1, Variable& var2, int value2);
-    bool check_assignment_consistency(const map<string, int>& assignment, const Variable& variable, const int& value);
-    bool update_variable_domain(Variable& var1, Variable& var2);
+    // constraints
+    vector<Mother_Constraint*> get_constraints_linked_to(const int& variable_index);
 
-    bool backtrack_iterative(map<string, int>& assignment, bool activate_FC, map<string, vector<int>> sorted_domains);
+    bool check_assignment_consistency(const map<int, int>& assignment, const int& variable_index, const int& value);
+    bool update_variable_domain(const int& var_1_index, const int& var_2_index, vector<Variable>& variables);
 
-    void forward_checking(Variable& new_assigned_variable, const int& assigned_value, map<string, int>& domains_index, const map<string, int>& current_assignment);
+    bool backtrack_iterative(map<int, int>& assignment, bool activate_FC, bool activate_MAC, string variable_order_strategy);
 
-    bool AC_1(std::vector<Constraint>& constraints, vector<Variable>& variables);
-    bool AC_3(std::vector<Constraint>& constraints, vector<Variable>& variables);
+    void forward_checking(const int& new_assigned_variable_idx, const int& assigned_value, map<int, int>& domains_index, const map<int, int>& current_assignment);
 
-    tuple<map<string, int>, int, double> solve(std::vector<Constraint>& constraints, vector<Variable>& variables,
-        bool activate_AC1 = false, bool activate_AC3 = true, bool activate_FC = true, string value_order_strategy = "", string variable_order_startegy = "");
+    bool AC_1();
+    bool root_AC_3();
+    void leaf_AC_3(const int& new_assigned_variable_idx, const int& assigned_value,
+        map<int, int>& domains_index, const map<int, int>& current_assignment);
+
+    tuple<map<int, int>, int, double> solve(std::vector<Mother_Constraint*>& constraints, vector<Variable>& variables,
+        bool activate_AC1 = false, bool activate_AC3 = true, bool activate_FC = true, bool activate_MAC = false, string value_order_strategy = "", string variable_order_startegy = "");
 };
 
 #endif
