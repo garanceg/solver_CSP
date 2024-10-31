@@ -13,7 +13,7 @@ using namespace std;
 
 int main() {
     // int num_variables = 10;    // Nombre de variables
-    // int domain_size = 5;      // Taille du domaine
+    // int domain_size = 15;      // Taille du domaine
     // CSP csp = generate_random_CSP(num_variables, domain_size);
 
     // vector<int> domain{ 0, 1, 2 };
@@ -74,8 +74,8 @@ int main() {
     // }
     // outputFile.close();
 
-    // CSP csp = create_graph_coloring_CSP("color_instances/queen5_5.col", 5);
-    CSP csp = create_n_queens_CSP_2(20);
+    CSP csp = create_graph_coloring_CSP("color_instances/queen5_5.col", 5);
+    // CSP csp = create_n_queens_CSP_2(20);
 
     bool activate_AC1 = true;
     bool activate_AC3 = false;

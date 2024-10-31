@@ -83,7 +83,6 @@ bool Diff_Constraint::propagate(const int& new_assigned_variable_idx, const int&
     for (int i = 0; i < domains_index[other_variable_index]; i++) {
         if (variables[other_variable_index].domain[i] == forbidden_value) {
             has_propagated = true;
-            cout << forbidden_value << endl;
             // If the value is not supported we swap it with the value just before the marker
             std::swap(variables[other_variable_index].domain[i], variables[other_variable_index].domain[domains_index[other_variable_index] - 1]);
             // Reduce the marker
